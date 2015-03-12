@@ -1,4 +1,6 @@
+var fs = require('fs');
 var http = require('http');
+var path = require('path');
 
 var ws = require('ws');
 
@@ -8,6 +10,22 @@ var WebSocketServer = ws.Server;
 
 function Server(opts) {
   opts = opts || {};
+
+  if (!opts.connectionListener) {
+    opts.connectionListener = function (req, res) {
+      var url = req.url.split('?')[0];
+      if (url === '/demo.html') {
+        res.writeHead(200, {'Content-Type': 'text/html'});
+        var stream = fs.createReadStream(path.join(__dirname, '..' + url));
+        stream.pipe(res);
+      }
+      if (url === '/socketpeer.js') {
+        res.writeHead(200, {'Content-Type': 'text/javascript'});
+        var stream = fs.createReadStream(path.join(__dirname, '..' + url));
+        stream.pipe(res);
+      }
+    };
+  }
 
   if (!opts.httpServer) {
     var host = opts.host || process.env.SOCKETPEER_HOST || process.env.HOST || '0.0.0.0';
