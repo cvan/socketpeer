@@ -84,6 +84,11 @@ function Server(opts) {
     client.on('message.pair', function (pairCode) {
       console.log('[pair] Received pairCode:', pairCode);
 
+      if (connections[pairCode]) {
+        client.sendMessage('busy');
+        return;
+      }
+
       client.pairCode = pairCode;
 
       var waiting = peersWaiting[pairCode];
@@ -135,8 +140,6 @@ function Server(opts) {
         closeConnection(client.pairCode);
       }
     });
-
-    // TODO: Emit an error if third peer tries to join with same pairCode.
   });
 
   return opts.httpServer;

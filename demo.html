@@ -24,6 +24,10 @@
           console.log('data: %s', data);
         });
 
+        peer.on('busy', function () {
+          console.error('pairCode already in use');
+        });
+
         peer.on('peer.found', function () {
           console.log('peer.found');
           peer.send('hello');

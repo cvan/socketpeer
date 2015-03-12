@@ -145,6 +145,10 @@ Fired when a connection falls back to WebSockets.
 
 Called when the peer connection has closed.
 
+### `peer.on('busy', function (err) {})`
+
+Fired when two clients are already connected using a same pair code. `err` is an `Error` object.
+
 ### `peer.on('error', function (err) {})`
 
 Fired when an error occurs. `err` is an `Error` object.

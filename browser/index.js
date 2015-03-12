@@ -45,8 +45,16 @@ function SocketPeer(opts) {
 
   var self = this;
 
-  self.on('peer.found', self._rtcInit);
+  self.on('peer.found', function (data) {
+    self._connections.socket.attempt = 0;
+    self._rtcInit(data);
+  });
   self.on('rtc.signal', self._rtcSignal);
+
+  self.on('busy', function () {
+    self._socketError(new Error('Pair code "' + self.pairCode + '" already in use'));
+    self.socket.close();
+  });
 
   if (this.autoconnect) {
     setTimeout(function () {
@@ -94,7 +102,6 @@ SocketPeer.prototype.connect = function () {
   self.socket.onopen = function () {
     self.socketConnected = true;
     self._connections.socket.success++;
-    self._connections.socket.attempt = 0;
     self.emit('connect');
     if (self._connections.socket.success > 0) {
       self.emit('reconnect');
@@ -102,14 +109,7 @@ SocketPeer.prototype.connect = function () {
 
     self.pair();
   };
-  self.socket.onerror = function (err) {
-    self._connections.socket.error++;
-    self.emit('error', err);
-    self.emit('connect_error', err);
-    if (self._connections.socket.success > 0) {
-      self.emit('reconnect_error');
-    }
-  };
+  self.socket.onerror = self._socketError.bind(self);
   self.socket.onmessage = function (event) {
     var obj = {};
     try {
@@ -137,6 +137,17 @@ SocketPeer.prototype.connect = function () {
   };
 
   clearTimeout(connectTimeout);
+};
+
+
+SocketPeer.prototype._socketError = function (err) {
+  var self = this;
+  self._connections.socket.error++;
+  self.emit('error', err);
+  self.emit('connect_error', err);
+  if (self._connections.socket.success > 0) {
+    self.emit('reconnect_error');
+  }
 };
 
 
