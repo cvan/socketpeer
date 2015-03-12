@@ -1,0 +1,47 @@
+{
+  "name": "socketpeer",
+  "description": "simple 1:1 messaging via WebRTC Data Channels and WebSockets",
+  "version": "0.0.1",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/cvan/socketpeer.git"
+  },
+  "bugs": {
+    "url": "https://github.com/cvan/socketpeer/issues"
+  },
+  "dependencies": {
+    "inherits": "^2.0.1",
+    "simple-peer": "^4.0.2",
+    "ws": "^0.7.1",
+    "xtend": "^4.0.0"
+  },
+  "devDependencies": {
+    "browserify": "^9.0.3",
+    "nodemon": "^1.3.7",
+    "onchange": "^1.0.0",
+    "uglify-js": "^2.4.17"
+  },
+  "keywords": [
+    "webrtc",
+    "p2p",
+    "data channel",
+    "data channels",
+    "data",
+    "peer",
+    "stream",
+    "peer-to-peer",
+    "data channel stream",
+    "webrtc stream",
+    "peer",
+    "websocket",
+    "websockets",
+    "socketpeer"
+  ],
+  "license": "MIT",
+  "main": "index.js",
+  "browser": "browser/index.js",
+  "scripts": {
+    "build": "browserify -s SocketPeer -r ./browser/ | tee build/socketpeer.js | uglifyjs -c warnings=false -m > build/socketpeer.min.js",
+    "watch": "npm run build && onchange browser/* -- npm run build"
+  }
+}

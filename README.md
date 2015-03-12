@@ -1,12 +1,12 @@
 # socketpeer
 
-Simple messaging via WebRTC Data Channels and WebSockets.
+Simple 1:1 messaging via WebRTC Data Channels and WebSockets.
 
 
 ## Features
 
 * concise, Node.js-style API for **[WebRTC](https://en.wikipedia.org/wiki/WebRTC)**
-* easy peer connection pairing
+* simple 1:1 peer connection signalling, pairing, and messaging
 * fallback to WebSockets if WebRTC Data Channels are unsupported
 * automatic reconnection if peer connections prematurely close
 
@@ -24,7 +24,18 @@ To install from npm:
 
 To install the Node dependencies from the git repository:
 
-	npm install
+    npm install
+
+
+## Development
+
+To run the browserify watcher (files are output to the `build/` directory):
+
+    npm run watch
+
+To create the browserify bundles (files are output to the `build/` directory):
+
+    npm run build
 
 
 ## Client API
