@@ -87,6 +87,7 @@ SocketPeer.prototype.connect = function () {
 
   self.socket = new WebSocket(self.url.replace(/^http/, 'ws'));
   self.socket.onopen = function () {
+    self.socketConnected = true;
     self._connections.socket.success++;
     self.emit('connect');
     if (self._connections.socket.success > 0) {
@@ -164,6 +165,13 @@ SocketPeer.prototype._rtcInit = function (data) {
   self.peer.on('close', function (data) {
     self.emit('downgrade');
     self.rtcConnected = false;
+    self._send('rtc.close', {pairCode: self.pairCode});
+
+    if (self.socketConnected) {
+      setTimeout(function () {
+        self.pair();
+      }, self.reconnectDelay);
+    }
   });
 };
 
