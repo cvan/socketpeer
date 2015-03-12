@@ -12,3 +12,5 @@ data/
 lib-cov
 logs
 node_modules
+socketpeer.min.js
+socketpeer.js
