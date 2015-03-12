@@ -23,6 +23,11 @@ function SocketPeer(opts) {
   this.socketConnected = false;
   this.rtcConnected = false;
 
+  this._connections = {
+    socket: {success: 0, error: 0, attempt: 0},
+    rtc: {success: 0, error: 0, attempt: 0}
+  };
+
   extend(this, {
     pairCode: 'pairCode' in opts ? opts.pairCode : null,
     socketFallback: 'socketFallback' in opts ? opts.socketFallback : true,
@@ -49,9 +54,30 @@ function SocketPeer(opts) {
 inherits(SocketPeer, EventEmitter);
 
 
+SocketPeer.prototype.pair = function (pairCode) {
+  var self = this;
+  if (typeof pairCode !== 'undefined') {
+    self.pairCode = pairCode;
+  }
+
+  self._send('pair', self.pairCode);
+};
+
+
 SocketPeer.prototype.connect = function () {
   var self = this;
+
+  self._connections.socket.attempt++;
+
+  if (self.socketConnected) {
+    console.warn('Socket already connected');
+    return;
+  }
+
   self.emit('connect_attempt');
+  if (self._connections.socket.success > 0) {
+    self.emit('reconnect_attempt');
+  }
 
   var connectTimeout = setTimeout(function () {
     if (!self.socketConnected) {
@@ -61,11 +87,21 @@ SocketPeer.prototype.connect = function () {
 
   self.socket = new WebSocket(self.url.replace(/^http/, 'ws'));
   self.socket.onopen = function () {
+    self._connections.socket.success++;
     self.emit('connect');
-    self._send('pair', self.pairCode);
+    if (self._connections.socket.success > 0) {
+      self.emit('reconnect');
+    }
+
+    self.pair();
   };
-  self.socket.onerror = function () {
-    self.emit('connect_error');
+  self.socket.onerror = function (err) {
+    self._connections.socket.error++;
+    self.emit('error', err);
+    self.emit('connect_error', err);
+    if (self._connections.socket.success > 0) {
+      self.emit('reconnect_error');
+    }
   };
   self.socket.onmessage = function (event) {
     var obj = {};
@@ -93,6 +129,12 @@ SocketPeer.prototype.connect = function () {
 SocketPeer.prototype._rtcInit = function (data) {
   var self = this;
 
+  if (self.rtcConnected) {
+    console.warn('WebRTC peer already connected');
+    return;
+  }
+
+  self._connections.rtc.attempt++;
   self.emit('upgrade_attempt');
 
   self.peer = new SimplePeer({
@@ -100,11 +142,14 @@ SocketPeer.prototype._rtcInit = function (data) {
   });
 
   self.peer.on('connect', function () {
+    self._connections.rtc.success++;
     self.emit('upgrade');
     self.rtcConnected = true;
   });
 
   self.peer.on('error', function (err) {
+    self._connections.rtc.error++;
+    self.emit('error', err);
     self.emit('upgrade_error', err);
   });
 
@@ -155,6 +200,12 @@ SocketPeer.prototype.send = function (data) {
 SocketPeer.prototype.close = function () {
   var self = this;
   self._debug('close');
+
+  if (self.reconnect) {
+    setTimeout(function () {
+      self.connect();
+    }, self.reconnectDelay);
+  }
 };
 
 
