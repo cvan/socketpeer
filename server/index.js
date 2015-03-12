@@ -113,6 +113,16 @@ function Server(opts) {
       }
     });
 
+    client.on('message.rtc.close', function (data) {
+      var peer = client.peer;
+      var pairCode = data.pairCode;
+      if (peer) {
+        peer.peer = null;
+        client.peer = null;
+      }
+      peersWaiting[pairCode] = client;
+    });
+
     client.on('close', function () {
       if (client.pairCode in peersWaiting) {
         peersWaiting[client.pairCode] = null;
@@ -121,17 +131,6 @@ function Server(opts) {
       if (client.peer) {
         closeConnection(client.pairCode);
       }
-    });
-
-    client.on('rtc.close', function (data) {
-      var peer = client.peer;
-      var pairCode = data.pairCode;
-      if (peer) {
-        peer.send('rtc.close');
-        peer.peer = null;
-        client.peer = null;
-      }
-      peersWaiting[pairCode] = client;
     });
 
     // TODO: Emit an error if third peer tries to join with same pairCode.
