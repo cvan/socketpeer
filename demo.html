@@ -34,8 +34,16 @@
           peer.send('upgraded');
         });
 
+        peer.on('upgrade_attempt', function () {
+          console.log('upgrade_attempt');
+        });
+
         peer.on('downgrade', function () {
           console.log('downgrade');
+        });
+
+        peer.on('error', function (err) {
+          console.error('Error: %o', err);
         });
 
         window.peer = peer;

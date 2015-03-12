@@ -50,7 +50,7 @@ function Server(opts) {
     connections[pairCode].forEach(function (conn) {
       conn.peer = null;
     });
-    connections[pairCode] = [];
+    connections[pairCode] = null;
   }
 
   function sendMessage(type, data) {
@@ -124,11 +124,14 @@ function Server(opts) {
     });
 
     client.on('close', function () {
-      if (client.pairCode in peersWaiting) {
+      if (client.pairCode in peersWaiting &&
+          peersWaiting[client.pairCode] === client) {
+
         peersWaiting[client.pairCode] = null;
       }
 
       if (client.peer) {
+        peersWaiting[client.pairCode] = client.peer;
         closeConnection(client.pairCode);
       }
     });
