@@ -20,6 +20,8 @@ function SocketPeer(opts) {
 
   EventEmitter.call(this);
 
+  this.peer = null;
+
   this.socketConnected = false;
   this.rtcConnected = false;
 
@@ -42,6 +44,9 @@ function SocketPeer(opts) {
   this._debug('New peer');
 
   var self = this;
+
+  self.on('peer.found', self._rtcInit);
+  self.on('rtc.signal', self._rtcSignal);
 
   if (this.autoconnect) {
     setTimeout(function () {
@@ -89,6 +94,7 @@ SocketPeer.prototype.connect = function () {
   self.socket.onopen = function () {
     self.socketConnected = true;
     self._connections.socket.success++;
+    self._connections.socket.attempt = 0;
     self.emit('connect');
     if (self._connections.socket.success > 0) {
       self.emit('reconnect');
@@ -117,13 +123,26 @@ SocketPeer.prototype.connect = function () {
       self.emit(obj.type, obj.data);
     }
   };
+  self.socket.onclose = function () {
+    self.socketConnected = false;
+    self._debug('close');
 
-  self.on('peer.found', self._rtcInit);
-  self.on('rtc.signal', self._rtcSignal);
-
-  self.peer = null;
+    if (self.reconnect) {
+      var delay = self._calcReconnectTimeout(self._connections.socket.attempt);
+      clearTimeout(self._socketReconnectTimeout);
+      self._socketReconnectTimeout = setTimeout(function () {
+        self.connect();
+      }, delay);
+    }
+  };
 
   clearTimeout(connectTimeout);
+};
+
+
+SocketPeer.prototype._calcReconnectTimeout = function (attempts) {
+  var self = this;
+  return Math.min(Math.pow(2, attempts) * self.reconnectDelay, 30000);
 };
 
 
@@ -144,6 +163,7 @@ SocketPeer.prototype._rtcInit = function (data) {
 
   self.peer.on('connect', function () {
     self._connections.rtc.success++;
+    self._connections.rtc.attempt = 0;
     self.emit('upgrade');
     self.rtcConnected = true;
   });
@@ -168,9 +188,11 @@ SocketPeer.prototype._rtcInit = function (data) {
     self._send('rtc.close', {pairCode: self.pairCode});
 
     if (self.socketConnected) {
-      setTimeout(function () {
+      var delay = self._calcReconnectTimeout(self._connections.rtc.attempt);
+      clearTimeout(self._rtcReconnectTimeout);
+      self._rtcReconnectTimeout = setTimeout(function () {
         self.pair();
-      }, self.reconnectDelay);
+      }, delay);
     }
   });
 };
@@ -207,13 +229,8 @@ SocketPeer.prototype.send = function (data) {
 
 SocketPeer.prototype.close = function () {
   var self = this;
-  self._debug('close');
-
-  if (self.reconnect) {
-    setTimeout(function () {
-      self.connect();
-    }, self.reconnectDelay);
-  }
+  self.socket.close();
+  self.peer.destroy();
 };
 
 
