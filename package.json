@@ -38,9 +38,12 @@
     "socketpeer"
   ],
   "license": "MIT",
-  "main": "index.js",
+  "main": "server/index.js",
   "browser": "browser/index.js",
   "scripts": {
+    "start": "NODE_ENVIRONMENT=production node server",
+    "dev": "NODE_ENVIRONMENT=dev nodemon server",
+    "prod": "NODE_ENVIRONMENT=production node server",
     "build": "npm run browserify && npm run minify",
     "browserify": "browserify -s SocketPeer -r ./browser/ -o socketpeer.js",
     "minify": "uglifyjs socketpeer.js -c warnings=false -m > socketpeer.min.js",
