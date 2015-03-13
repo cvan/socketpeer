@@ -95,7 +95,7 @@ SocketPeer extends Node's [`EventEmitter`](https://nodejs.org/api/events.html). 
 Destroy and cleanup this peer connection.
 
 
-## events
+## Events
 
 ### `peer.on('connect', function () {})`
 
