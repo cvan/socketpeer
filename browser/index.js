@@ -37,7 +37,7 @@ function SocketPeer(opts) {
     url: 'url' in opts ? opts.url : 'http://localhost',
     reconnect: 'reconnect' in opts ? opts.reconnect : true,
     reconnectDelay: 'reconnectDelay' in opts ? opts.reconnectDelay : 1000,
-    timeout: 'timeout' in opts ? opts.timeout : 100,
+    timeout: 'timeout' in opts ? opts.timeout : 0,
     autoconnect: 'autoconnect' in opts ? opts.autoconnect : true
   }, opts);
 
@@ -46,10 +46,25 @@ function SocketPeer(opts) {
   var self = this;
 
   self.on('peer.found', function (data) {
+    self.emit('connect');
+    if (self._connections.socket.success > 0) {
+      self.emit('reconnect');
+    }
+    self.socketConnected = true;
+    clearTimeout(self._socketConnectTimeout);
+    clearTimeout(self._socketReconnectDelayTimeout);
     self._connections.socket.attempt = 0;
-    self._rtcInit(data);
+    self._connections.socket.success++;
+
+    if (data.initiator) {
+      self._send('rtc.connect');
+      self._rtcInit({initiator: true});
+    }
   });
   self.on('rtc.signal', self._rtcSignal);
+  self.on('rtc.connect', function () {
+    self._rtcInit({initiator: false});
+  });
 
   self.on('busy', function () {
     self._socketError(new Error('Pair code "' + self.pairCode + '" already in use'));
@@ -92,21 +107,15 @@ SocketPeer.prototype.connect = function () {
     self.emit('reconnect_attempt');
   }
 
-  var connectTimeout = setTimeout(function () {
-    if (!self.socketConnected) {
-      self.close();
-    }
-  }, self.timeout);
+  if (self.timeout) {
+    self._socketConnectTimeout = setTimeout(function () {
+      self.emit('connect_timeout');
+      self.socket.close();
+    }, self.timeout);
+  }
 
   self.socket = new WebSocket(self.url.replace(/^http/, 'ws'));
   self.socket.onopen = function () {
-    self.socketConnected = true;
-    self._connections.socket.success++;
-    self.emit('connect');
-    if (self._connections.socket.success > 0) {
-      self.emit('reconnect');
-    }
-
     self.pair();
   };
   self.socket.onerror = self._socketError.bind(self);
@@ -115,6 +124,7 @@ SocketPeer.prototype.connect = function () {
     try {
       obj = JSON.parse(event.data);
     } catch (e) {
+      self.emit(new Error('Expected JSON-formatted WebSocket message'));
     }
 
     if (obj.type === 'data') {
@@ -129,14 +139,12 @@ SocketPeer.prototype.connect = function () {
 
     if (self.reconnect) {
       var delay = self._calcReconnectTimeout(self._connections.socket.attempt);
-      clearTimeout(self._socketReconnectTimeout);
-      self._socketReconnectTimeout = setTimeout(function () {
+      clearTimeout(self._socketReconnectDelayTimeout);
+      self._socketReconnectDelayTimeout = setTimeout(function () {
         self.connect();
       }, delay);
     }
   };
-
-  clearTimeout(connectTimeout);
 };
 
 
@@ -173,6 +181,7 @@ SocketPeer.prototype._rtcInit = function (data) {
   });
 
   self.peer.on('connect', function () {
+    clearTimeout(self._rtcReconnectTimeout);
     self._connections.rtc.success++;
     self._connections.rtc.attempt = 0;
     self.emit('upgrade');
@@ -195,14 +204,18 @@ SocketPeer.prototype._rtcInit = function (data) {
 
   self.peer.on('close', function (data) {
     self.emit('downgrade');
+    self.peer = null;
     self.rtcConnected = false;
+
+    // NOTE: Currently the server does nothing with this message.
     self._send('rtc.close', {pairCode: self.pairCode});
 
     if (self.socketConnected) {
       var delay = self._calcReconnectTimeout(self._connections.rtc.attempt);
       clearTimeout(self._rtcReconnectTimeout);
       self._rtcReconnectTimeout = setTimeout(function () {
-        self.pair();
+        self._send('rtc.connect');
+        self._rtcInit({initiator: true});
       }, delay);
     }
   });

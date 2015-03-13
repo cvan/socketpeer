@@ -20,6 +20,10 @@
           console.log('connected');
         });
 
+        peer.on('connect_timeout', function () {
+          console.error('connect_timeout');
+        });
+
         peer.on('data', function (data) {
           console.log('data: %s', data);
         });

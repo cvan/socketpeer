@@ -118,14 +118,12 @@ function Server(opts) {
       }
     });
 
-    client.on('message.rtc.close', function (data) {
-      var peer = client.peer;
-      var pairCode = data.pairCode;
-      if (peer) {
-        peer.peer = null;
-        client.peer = null;
+    client.on('message.rtc.connect', function () {
+      console.log('[rtc.connect] Received');
+
+      if (client.peer) {
+        client.peer.sendMessage('rtc.connect');
       }
-      peersWaiting[pairCode] = client;
     });
 
     client.on('close', function () {
