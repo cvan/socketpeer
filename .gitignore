@@ -3,7 +3,6 @@
 *.floo*
 *.gz
 *.log
-*.min.js
 *.out
 *.pid
 *.seed
@@ -12,5 +11,3 @@ data/
 lib-cov
 logs
 node_modules
-socketpeer.min.js
-socketpeer.js
