@@ -46,15 +46,16 @@ function SocketPeer(opts) {
   var self = this;
 
   self.on('peer.found', function (data) {
-    self.emit('connect');
-    if (self._connections.socket.success > 0) {
-      self.emit('reconnect');
-    }
     self.socketConnected = true;
     clearTimeout(self._socketConnectTimeout);
     clearTimeout(self._socketReconnectDelayTimeout);
     self._connections.socket.attempt = 0;
     self._connections.socket.success++;
+
+    self.emit('connect');
+    if (self._connections.socket.success > 0) {
+      self.emit('reconnect');
+    }
 
     if (data.initiator) {
       self._send('rtc.connect');
@@ -102,15 +103,12 @@ SocketPeer.prototype.connect = function () {
     return;
   }
 
-  self.emit('connect_attempt');
-  if (self._connections.socket.success > 0) {
-    self.emit('reconnect_attempt');
-  }
-
   if (self.timeout) {
     self._socketConnectTimeout = setTimeout(function () {
-      self.emit('connect_timeout');
       self.socket.close();
+      var err = new Error('Connection timeout after ' + self.timeout + ' ms');
+      self.emit('connect_timeout', err);
+      self._socketError(err);
     }, self.timeout);
   }
 
@@ -145,6 +143,11 @@ SocketPeer.prototype.connect = function () {
       }, delay);
     }
   };
+
+  self.emit('connect_attempt');
+  if (self._connections.socket.success > 0) {
+    self.emit('reconnect_attempt');
+  }
 };
 
 
@@ -173,9 +176,6 @@ SocketPeer.prototype._rtcInit = function (data) {
     return;
   }
 
-  self._connections.rtc.attempt++;
-  self.emit('upgrade_attempt');
-
   self.peer = new SimplePeer({
     initiator: !!data.initiator
   });
@@ -184,14 +184,14 @@ SocketPeer.prototype._rtcInit = function (data) {
     clearTimeout(self._rtcReconnectTimeout);
     self._connections.rtc.success++;
     self._connections.rtc.attempt = 0;
-    self.emit('upgrade');
     self.rtcConnected = true;
+    self.emit('upgrade');
   });
 
   self.peer.on('error', function (err) {
     self._connections.rtc.error++;
-    self.emit('error', err);
     self.emit('upgrade_error', err);
+    self.emit('error', err);
   });
 
   self.peer.on('signal', function (data) {
@@ -203,7 +203,6 @@ SocketPeer.prototype._rtcInit = function (data) {
   });
 
   self.peer.on('close', function (data) {
-    self.emit('downgrade');
     self.peer = null;
     self.rtcConnected = false;
 
@@ -218,7 +217,12 @@ SocketPeer.prototype._rtcInit = function (data) {
         self._rtcInit({initiator: true});
       }, delay);
     }
+
+    self.emit('downgrade');
   });
+
+  self._connections.rtc.attempt++;
+  self.emit('upgrade_attempt');
 };
 
 
@@ -253,8 +257,26 @@ SocketPeer.prototype.send = function (data) {
 
 SocketPeer.prototype.close = function () {
   var self = this;
-  self.socket.close();
-  self.peer.destroy();
+  if (self.peer) {
+    self.peer.destroy();
+  }
+  if (self.socket) {
+    self.socket.close();
+  }
+};
+
+
+SocketPeer.prototype.destroy = function() {
+  var self = this;
+  self.reconnect = false;
+  self.close();
+  self.peer = null;
+  self.socket = null;
+  self.socketConnected = false;
+  self.rtcConnected = false;
+  clearTimeout(self._socketConnectTimeout);
+  clearTimeout(self._socketReconnectDelayTimeout);
+  clearTimeout(self._rtcReconnectTimeout);
 };
 
 
