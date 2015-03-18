@@ -6,17 +6,23 @@ test('connect_attempt event gets emitted', function (t) {
 
   var peer = new SocketPeer({
     pairCode: 'yolo',
-    url: 'http://localhost:3000'
+    url: 'http://localhost:3000',
+    reconnect: false,
+    timeout: 0
   });
 
   peer.on('connect_attempt', function () {
-    t.pass('got connect_attempt event');
+    t.ok(true, 'got connect_attempt event');
     t.equal(peer.socketConnected, false, 'peer.socketConnected');
     t.equal(peer._connections.socket.attempt, 1, 'peer._connections.socket.attempt');
     t.equal(peer._connections.socket.success, 0, 'peer._connections.socket.success');
     t.equal(peer._connections.socket.error, 0, 'peer._connections.socket.error');
     peer.destroy();
     t.end();
+  });
+
+  peer.on('error', function (err) {
+    console.warn('Ignoring error: %s', err.message);
   });
 
 });

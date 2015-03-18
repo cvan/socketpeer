@@ -116,7 +116,9 @@ SocketPeer.prototype.connect = function () {
   self.socket.onopen = function () {
     self.pair();
   };
-  self.socket.onerror = self._socketError.bind(self);
+  self.socket.onerror = function (event) {
+    self._socketError(new Error(event.data || 'Unexpected WebSocket error'));
+  };
   self.socket.onmessage = function (event) {
     var obj = {};
     try {
