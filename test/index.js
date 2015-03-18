@@ -11,10 +11,10 @@ test('connect_attempt event gets emitted', function (t) {
 
   peer.on('connect_attempt', function () {
     t.pass('got connect_attempt event');
-    t.equal(peer.socketConnected, false);
-    t.equal(peer._connections.socket.attempt, 1);
-    t.equal(peer._connections.socket.success, 0);
-    t.equal(peer._connections.socket.error, 0);
+    t.equal(peer.socketConnected, false, 'peer.socketConnected');
+    t.equal(peer._connections.socket.attempt, 1, 'peer._connections.socket.attempt');
+    t.equal(peer._connections.socket.success, 0, 'peer._connections.socket.success');
+    t.equal(peer._connections.socket.error, 0, 'peer._connections.socket.error');
     peer.destroy();
     t.end();
   });
@@ -37,17 +37,17 @@ test('basic lifecycle', function (t) {
   });
 
   peer1.on('connect', function () {
-    t.equal(peer1.socketConnected, true);
-    t.equal(peer1._connections.socket.attempt, 0);
-    t.equal(peer1._connections.socket.success, 1);
-    t.equal(peer1._connections.socket.error, 0);
+    t.equal(peer1.socketConnected, true, 'peer1.socketConnected');
+    t.equal(peer1._connections.socket.attempt, 0, 'peer1._connections.socket.attempt');
+    t.equal(peer1._connections.socket.success, 1, 'peer1._connections.socket.success');
+    t.equal(peer1._connections.socket.error, 0, 'peer1._connections.socket.error');
     tryConnect();
   });
   peer2.on('connect', function () {
-    t.equal(peer2.socketConnected, true);
-    t.equal(peer2._connections.socket.attempt, 0);
-    t.equal(peer2._connections.socket.success, 1);
-    t.equal(peer2._connections.socket.error, 0);
+    t.equal(peer2.socketConnected, true, 'peer2.socketConnected');
+    t.equal(peer2._connections.socket.attempt, 0, 'peer2._connections.socket.attempt');
+    t.equal(peer2._connections.socket.success, 1, 'peer2._connections.socket.success');
+    t.equal(peer2._connections.socket.error, 0, 'peer2._connections.socket.error');
     tryConnect();
   });
 
@@ -90,7 +90,7 @@ test('connect_timeout event gets emitted', function (t) {
 
   peer.on('connect_timeout', function () {
     t.ok(true, 'got connect_timeout event');
-    t.equal(peer.socketConnected, false);
+    t.equal(peer.socketConnected, false, 'peer.socketConnected');
   });
 
   peer.on('connect_error', function () {
@@ -99,9 +99,9 @@ test('connect_timeout event gets emitted', function (t) {
 
   peer.on('error', function () {
     t.ok(true, 'got error event');
-    t.equal(peer._connections.socket.attempt, 1, 'connect_timeout.attempt');
-    t.equal(peer._connections.socket.success, 0, 'connect_timeout.success');
-    t.equal(peer._connections.socket.error, 1, 'connect_timeout.error');
+    t.equal(peer._connections.socket.attempt, 1, 'peer._connections.socket.attempt');
+    t.equal(peer._connections.socket.success, 0, 'peer._connections.socket.success');
+    t.equal(peer._connections.socket.error, 1, 'peer._connections.socket.error');
     peer.destroy();
     t.end();
   });
