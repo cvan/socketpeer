@@ -13,24 +13,25 @@ var EventEmitter = events.EventEmitter;
  * @param {Object} opts
  */
 function SocketPeer(opts) {
-  if (!(this instanceof SocketPeer)) {
+  var self = this;
+
+  if (!(self instanceof SocketPeer)) {
     return new SocketPeer(opts);
   }
+
   opts = opts || {};
 
-  EventEmitter.call(this);
+  EventEmitter.call(self);
 
-  this.peer = null;
-
-  this.socketConnected = false;
-  this.rtcConnected = false;
-
-  this._connections = {
+  self._connections = {
     socket: {success: 0, error: 0, attempt: 0},
     rtc: {success: 0, error: 0, attempt: 0}
   };
+  self.peer = null;
+  self.rtcConnected = false;
+  self.socketConnected = false;
 
-  extend(this, {
+  extend(self, {
     pairCode: 'pairCode' in opts ? opts.pairCode : null,
     socketFallback: 'socketFallback' in opts ? opts.socketFallback : true,
     socket: 'socket' in opts ? opts.socket : null,
@@ -41,9 +42,7 @@ function SocketPeer(opts) {
     autoconnect: 'autoconnect' in opts ? opts.autoconnect : true
   }, opts);
 
-  this._debug('New peer');
-
-  var self = this;
+  self._debug('New peer');
 
   self.on('peer.found', function (data) {
     self.emit('connect');
@@ -71,7 +70,7 @@ function SocketPeer(opts) {
     self.socket.close();
   });
 
-  if (this.autoconnect) {
+  if (self.autoconnect) {
     setTimeout(function () {
       self.connect();
     }, 0);
@@ -84,6 +83,7 @@ inherits(SocketPeer, EventEmitter);
 
 SocketPeer.prototype.pair = function (pairCode) {
   var self = this;
+
   if (typeof pairCode !== 'undefined') {
     self.pairCode = pairCode;
   }
