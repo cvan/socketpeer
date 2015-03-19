@@ -56,14 +56,16 @@ function SocketPeer(opts) {
       self.emit('reconnect');
     }
 
+    self.initiator = data.initiator;
+
     if (data.initiator) {
       self._send('rtc.connect');
-      self._rtcInit({initiator: true});
+      self._rtcInit();
     }
   });
   self.on('rtc.signal', self._rtcSignal);
   self.on('rtc.connect', function () {
-    self._rtcInit({initiator: false});
+    self._rtcInit();
   });
 
   self.on('busy', function () {
@@ -170,7 +172,7 @@ SocketPeer.prototype._calcReconnectTimeout = function (attempts) {
 };
 
 
-SocketPeer.prototype._rtcInit = function (data) {
+SocketPeer.prototype._rtcInit = function () {
   var self = this;
 
   if (self.rtcConnected) {
@@ -179,7 +181,7 @@ SocketPeer.prototype._rtcInit = function (data) {
   }
 
   self.peer = new SimplePeer({
-    initiator: !!data.initiator
+    initiator: self.initiator
   });
 
   self.peer.on('connect', function () {
@@ -197,6 +199,9 @@ SocketPeer.prototype._rtcInit = function (data) {
   });
 
   self.peer.on('signal', function (data) {
+    if (self.rtcConnected) {
+      return;
+    }
     self._send('rtc.signal', data);
   });
 
@@ -205,19 +210,18 @@ SocketPeer.prototype._rtcInit = function (data) {
   });
 
   self.peer.on('close', function (data) {
-    self.peer = null;
-    self.rtcConnected = false;
+    self.destroyPeer();
 
     if (self.socketConnected) {
       // NOTE: Currently the server does nothing with this message.
-      self._send('rtc.close', {pairCode: self.pairCode});
+      // self._send('rtc.close', {pairCode: self.pairCode});
 
-      if (self.reconnect) {
+      if (self.reconnect && self.initiator) {
         var delay = self._calcReconnectTimeout(self._connections.rtc.attempt);
         clearTimeout(self._rtcReconnectTimeout);
         self._rtcReconnectTimeout = setTimeout(function () {
           self._send('rtc.connect');
-          self._rtcInit({initiator: true});
+          self._rtcInit();
         }, delay);
       }
     }
@@ -232,7 +236,7 @@ SocketPeer.prototype._rtcInit = function (data) {
 
 SocketPeer.prototype._rtcSignal = function (data) {
   var self = this;
-  if (self.peer) {
+  if (!self.rtcConnected && self.peer && !self.peer.destroyed) {
     self.peer.signal(data);
   }
 };
@@ -265,9 +269,7 @@ SocketPeer.prototype.send = function (data) {
 
 SocketPeer.prototype.close = function () {
   var self = this;
-  if (self.peer) {
-    self.peer.destroy();
-  }
+  self.destroyPeer();
   if (self.socket) {
     self.socket.close();
   }
@@ -285,6 +287,16 @@ SocketPeer.prototype.destroy = function() {
   clearTimeout(self._socketConnectTimeout);
   clearTimeout(self._socketReconnectDelayTimeout);
   clearTimeout(self._rtcReconnectTimeout);
+};
+
+
+SocketPeer.prototype.destroyPeer = function() {
+  var self = this;
+  if (self.peer) {
+    self.peer.destroy();
+  }
+  self.peer = null;
+  self.rtcConnected = false;
 };
 
 

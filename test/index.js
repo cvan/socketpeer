@@ -169,7 +169,7 @@ test('message sent over WebSocket when RTC peer disconnects', function (t) {
       });
     });
 
-    peer2.peer.destroy();
+    peer2.destroyPeer();
   }
 
 });
@@ -207,6 +207,48 @@ test('socket reconnects', function (t) {
         peer1.socket.close();
       }, 0);
 
+    }
+  }
+
+});
+
+
+test('WebRTC reconnects', function (t) {
+
+  var peer1 = new SocketPeer({
+    pairCode: 'yolo',
+    url: 'http://localhost:3000'
+  });
+
+  var peer2 = new SocketPeer({
+    pairCode: 'yolo',
+    url: 'http://localhost:3000'
+  });
+
+  peer1.once('upgrade', tryUpgrade);
+  peer2.once('upgrade', tryUpgrade);
+
+  function tryUpgrade() {
+    if (peer1.rtcConnected && peer2.rtcConnected) {
+      t.ok(true, 'upgrade');
+
+      peer1.once('downgrade', function () {
+        t.ok(true, 'downgrade');
+
+        t.equal(peer1.rtcConnected, false, 'peer1.rtcConnected');
+      });
+
+      peer1.once('upgrade', function () {
+        t.ok(true, 'upgrade');
+
+        t.equal(peer1.rtcConnected, true, 'peer1.rtcConnected');
+
+        peer1.destroy();
+        peer2.destroy();
+        t.end();
+      });
+
+      peer1.destroyPeer();
     }
   }
 
