@@ -208,16 +208,18 @@ SocketPeer.prototype._rtcInit = function (data) {
     self.peer = null;
     self.rtcConnected = false;
 
-    // NOTE: Currently the server does nothing with this message.
-    self._send('rtc.close', {pairCode: self.pairCode});
+    if (self.socketConnected) {
+      // NOTE: Currently the server does nothing with this message.
+      self._send('rtc.close', {pairCode: self.pairCode});
 
-    if (self.socketConnected && self.reconnect) {
-      var delay = self._calcReconnectTimeout(self._connections.rtc.attempt);
-      clearTimeout(self._rtcReconnectTimeout);
-      self._rtcReconnectTimeout = setTimeout(function () {
-        self._send('rtc.connect');
-        self._rtcInit({initiator: true});
-      }, delay);
+      if (self.reconnect) {
+        var delay = self._calcReconnectTimeout(self._connections.rtc.attempt);
+        clearTimeout(self._rtcReconnectTimeout);
+        self._rtcReconnectTimeout = setTimeout(function () {
+          self._send('rtc.connect');
+          self._rtcInit({initiator: true});
+        }, delay);
+      }
     }
 
     self.emit('downgrade');
@@ -238,6 +240,10 @@ SocketPeer.prototype._rtcSignal = function (data) {
 
 SocketPeer.prototype._send = function (type, data) {
   var self = this;
+  if (!self.socket) {
+    console.warn('Attempted to send message when socket was closed: %s', type);
+    return;
+  }
   data = JSON.stringify({
     type: type,
     data: data

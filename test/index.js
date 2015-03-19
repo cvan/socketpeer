@@ -173,3 +173,41 @@ test('message sent over WebSocket when RTC peer disconnects', function (t) {
   }
 
 });
+
+
+test('socket reconnects', function (t) {
+
+  var peer1 = new SocketPeer({
+    pairCode: 'yolo',
+    url: 'http://localhost:3000'
+  });
+
+  var peer2 = new SocketPeer({
+    pairCode: 'yolo',
+    url: 'http://localhost:3000'
+  });
+
+  peer1.once('connect', tryConnect);
+  peer2.once('connect', tryConnect);
+
+  function tryConnect() {
+    if (peer1.socketConnected && peer2.socketConnected) {
+      t.ok(true, 'connected');
+
+      peer1.once('reconnect', function () {
+        t.equal(peer1.socketConnected, true, 'peer1.socketConnected');
+        t.equal(peer2.socketConnected, true, 'peer2.socketConnected');
+
+        peer1.destroy();
+        peer2.destroy();
+        t.end();
+      });
+
+      setTimeout(function () {
+        peer1.socket.close();
+      }, 0);
+
+    }
+  }
+
+});
