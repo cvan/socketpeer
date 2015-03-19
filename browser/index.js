@@ -211,7 +211,7 @@ SocketPeer.prototype._rtcInit = function (data) {
     // NOTE: Currently the server does nothing with this message.
     self._send('rtc.close', {pairCode: self.pairCode});
 
-    if (self.socketConnected) {
+    if (self.socketConnected && self.reconnect) {
       var delay = self._calcReconnectTimeout(self._connections.rtc.attempt);
       clearTimeout(self._rtcReconnectTimeout);
       self._rtcReconnectTimeout = setTimeout(function () {

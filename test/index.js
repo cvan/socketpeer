@@ -113,3 +113,63 @@ test('connect_timeout event gets emitted', function (t) {
   });
 
 });
+
+
+test('message sent over WebSocket when RTC peer disconnects', function (t) {
+
+  var peer1 = new SocketPeer({
+    pairCode: 'yolo',
+    url: 'http://localhost:3000',
+    reconnect: false,
+  });
+
+  var peer2 = new SocketPeer({
+    pairCode: 'yolo',
+    url: 'http://localhost:3000',
+    reconnect: false,
+  });
+
+  peer1.on('upgrade', tryUpgrade);
+  peer2.on('upgrade', tryUpgrade);
+
+  function tryUpgrade() {
+    if (peer1.rtcConnected && peer2.rtcConnected) {
+      t.ok(true, 'connected');
+      sendPing();
+    }
+  }
+
+  function sendPing() {
+    peer1.send('ping');
+
+    peer2.on('data', function (data) {
+      if (data === 'ping') {
+        t.ok(true, 'peer2 ping');
+        sendPong();
+      }
+    });
+  }
+
+  function sendPong() {
+    peer2.on('downgrade', function () {
+      t.equal(peer2.rtcConnected, false, 'peer2.rtcConnected');
+
+      peer2.send('pong');
+      peer1.on('data', function (data) {
+        t.equal(peer1.rtcConnected, false, 'peer1.rtcConnected');
+
+        if (data === 'pong') {
+          t.ok(true, 'peer1 pong');
+
+          peer1.destroy();
+          peer2.destroy();
+
+          t.end();
+        }
+      });
+    });
+
+    peer2.peer.destroy();
+  }
+
+});
