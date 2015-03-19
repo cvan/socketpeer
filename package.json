@@ -19,7 +19,9 @@
     "browserify": "^9.0.3",
     "nodemon": "^1.3.7",
     "onchange": "^1.0.0",
-    "uglify-js": "^2.4.17"
+    "tape": "^3.5.0",
+    "uglify-js": "^2.4.17",
+    "zuul": "^2.1.1"
   },
   "keywords": [
     "webrtc",
@@ -47,6 +49,8 @@
     "build": "npm run browserify && npm run minify",
     "browserify": "browserify -s SocketPeer -r ./browser/ -o socketpeer.js",
     "minify": "uglifyjs socketpeer.js -c warnings=false -m > socketpeer.min.js",
-    "watch": "npm run build && onchange browser/* -- npm run build"
+    "watch": "npm run build && onchange browser/* -- npm run build",
+    "test": "zuul -- test/*.js",
+    "test-local": "zuul --local 3001 -- test/*.js"
   }
 }
