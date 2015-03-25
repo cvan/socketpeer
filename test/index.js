@@ -1,4 +1,4 @@
-var SocketPeer = require('../server');
+var SocketPeer = require('../browser');
 var test = require('tape');
 
 
