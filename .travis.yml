@@ -1,4 +1,7 @@
 language: node_js
-sudo: false
 node_js:
-  - 'iojs'
+  - '0.10'
+env:
+  global:
+    - secure: hYrrXu5o3kRv+AGBoTpUT1ybT32j79q4Cq2GnJgtc0ACL1mBut+KbmG1R9NHtcrHhHigRVmZfDmijaU50QgmDjmbCe+D0ZohYXNxd+qhBbN9pNlrx3P5B8HUaiYAH06b+z8PK5qlXmrnkRFkZJGrdvfeJwEXyQmnkbDsj7bWxy0=
+    - secure: ZXyh5RmQos+QVmIftsALdh/gwbJvAxbfrHTc6J0b2V5GJN2CP6LblVf4YcmddSx1cin0C7uipzoL1pnj7MLaDgpk4LUzIFp852TV+3v7zGLI/TQkdnuMtaOWdk07aw2xKCzMfvyhjKDqy+6QSAhlR84M/n+APZRccPAYQdIM6s0=

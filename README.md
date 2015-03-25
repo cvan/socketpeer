@@ -38,6 +38,22 @@ To create the browserify bundles (files are output to the `build/` directory):
     npm run build
 
 
+## Testing
+
+Set these up locally:
+
+* [Sauce Labs](https://github.com/defunctzombie/zuul/wiki/cloud-testing)
+* [Travis CI](https://github.com/defunctzombie/zuul/wiki/Travis-ci)
+
+To run tests locally:
+
+    npm run test-local
+
+To run tests in the cloud:
+
+    npm test
+
+
 ## Client API
 
 ### `peer = new SocketPeer([opts])`
