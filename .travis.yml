@@ -1,7 +1,12 @@
 language: node_js
 node_js:
-  - '0.10'
+- '0.10'
+addons:
+  sauce_connect:
+    username: potch
+    access_key:
+      secure: bC+Vl6l8FuehwYmMnHIuHEHH6Au7z5q74KENNret+Thh4no3eT//7KuwT949ncxW6vzrqFot2JSYdFBdGqezYqSHIMdptimCk2qkuJDIuBrYA93IeWvbh3rDH3ayvqbHj0Cm+pINMZ8qGE/TDAbr3ddeDm14XMHOXYXCez18oMM=
 env:
   global:
-    - secure: hYrrXu5o3kRv+AGBoTpUT1ybT32j79q4Cq2GnJgtc0ACL1mBut+KbmG1R9NHtcrHhHigRVmZfDmijaU50QgmDjmbCe+D0ZohYXNxd+qhBbN9pNlrx3P5B8HUaiYAH06b+z8PK5qlXmrnkRFkZJGrdvfeJwEXyQmnkbDsj7bWxy0=
-    - secure: ZXyh5RmQos+QVmIftsALdh/gwbJvAxbfrHTc6J0b2V5GJN2CP6LblVf4YcmddSx1cin0C7uipzoL1pnj7MLaDgpk4LUzIFp852TV+3v7zGLI/TQkdnuMtaOWdk07aw2xKCzMfvyhjKDqy+6QSAhlR84M/n+APZRccPAYQdIM6s0=
+  - secure: EnaPf9+O+51DrhZncxeAGWyzc/7CNnKNPViECzbeZldliSgSOag5R76cc7JhgSlACXxRXH9b4c+7nQWe4OcjalylF/RQuLn2XswowR+fGFAd0rXdT06963Y1f3+wIId4a/VttmeEQYDHy+wZsilWnE6hZp0vakoOmr/oC0rQy1A=
+  - secure: dOvC2G2JI/VhKl9ybYvWL+PA5YJ99Otb8kiznzmYr6dyaokLQb3YFh6Ev8aDYhixfJ/Yi5v7DB7dV7LcUghKxRhlxMvgdH5Ur1cWIh+1aaC48VIdqPFie/K6LXJpu+Z9cu5+LbUJXz32y8cQmJyf59hDr6vxlH3SFRjCFZYh6+4=
