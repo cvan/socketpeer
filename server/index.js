@@ -27,7 +27,7 @@ function Server(opts) {
       var url = urllib.parse(req.url).pathname;
       if (url === '/socketpeer/socketpeer.js') {
         res.writeHead(200, {'Content-Type': 'text/javascript'});
-        var stream = fs.createReadStream(path.join(__dirname, '..' + url));
+        var stream = fs.createReadStream(path.join(__dirname, '..', 'socketpeer.js'));
         stream.pipe(res);
       }
     });
