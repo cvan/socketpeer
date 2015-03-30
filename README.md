@@ -73,20 +73,22 @@ If `opts` is specified, then the default options (shown below) will be overridde
   reconnect: true,
   reconnectDelay: 1000,
   timeout: 10000,
-  autoconnect: true
+  autoconnect: true,
+  serveLibrary: true
 }
 ```
 
 The options do the following:
 
 * `pairCode` - string used to identify peers
-* `socketFallback` - set to `true` to fall back to WebSockets when WebRTC is unavailable
+* `socketFallback` - when `true`, falls back to WebSockets when WebRTC is unavailable
 * `socket` - custom instance of a WebSocket connection to reuse
 * `url` - URL to WebSocket server
-* `reconnect` - set to `true` to reconnect if peer connection drops
+* `reconnect` - when `true`, reconnects if peer connection drops
 * `reconnectDelay` - if `reconnect` is set, how long to (ms) wait before reconnecting
 * `timeout` - how long to wait (ms) before abandoning connection
-* `autoconnect` - set to `true` to automatically connect upon page load
+* `autoconnect` - when `true`, automatically connects upon page load
+* `serveLibrary` - when `true`, serves library at `/socketpeer/socketpeer.js`
 
 ### `peer.connect()`
 

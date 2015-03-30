@@ -1,6 +1,7 @@
 var fs = require('fs');
 var http = require('http');
 var path = require('path');
+var urllib = require('url');
 
 var ws = require('ws');
 
@@ -11,35 +12,31 @@ var WebSocketServer = ws.Server;
 function Server(opts) {
   opts = opts || {};
 
-  if (!opts.connectionListener) {
-    opts.connectionListener = function (req, res) {
-      var url = req.url.split('?')[0];
-      if (url === '/demo.html') {
-        res.writeHead(200, {'Content-Type': 'text/html'});
-        var stream = fs.createReadStream(path.join(__dirname, '..' + url));
-        stream.pipe(res);
-      }
-      if (url === '/socketpeer.js') {
-        res.writeHead(200, {'Content-Type': 'text/javascript'});
-        var stream = fs.createReadStream(path.join(__dirname, '..' + url));
-        stream.pipe(res);
-      }
-    };
-  }
-
   if (!opts.httpServer) {
     var host = opts.host || process.env.SOCKETPEER_HOST || process.env.HOST || '0.0.0.0';
     var port = opts.port || process.env.SOCKETPEER_PORT || process.env.PORT || 3000;
-    opts.httpServer = http.createServer(opts.connectionListener);
+    opts.httpServer = http.createServer();
 
     opts.httpServer.listen(port, host, function () {
       console.log('[%s] Server listening on %s:%s', nodeEnv, host, port);
     });
   }
 
+  if (typeof opts.serveLibrary === 'undefined' || opts.serveLibrary) {
+    opts.httpServer.on('request', function (req, res) {
+      var url = urllib.parse(req.url).pathname;
+      if (url === '/socketpeer/socketpeer.js') {
+        res.writeHead(200, {'Content-Type': 'text/javascript'});
+        var stream = fs.createReadStream(path.join(__dirname, '..' + url));
+        stream.pipe(res);
+      }
+    });
+  }
+
   if (!opts.wsServer) {
     opts.wsServer = new WebSocketServer({
-      server: opts.httpServer
+      server: opts.httpServer,
+      path: '/socketpeer/'
     });
   }
 

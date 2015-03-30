@@ -6,7 +6,7 @@ test('connect_attempt event gets emitted', function (t) {
 
   var peer = new SocketPeer({
     pairCode: 'yolo',
-    url: 'http://localhost:3000',
+    url: 'http://localhost:3000/socketpeer/',
     reconnect: false,
     timeout: 0
   });
@@ -32,13 +32,13 @@ test('basic lifecycle', function (t) {
 
   var peer1 = new SocketPeer({
     pairCode: 'yolo',
-    url: 'http://localhost:3000',
+    url: 'http://localhost:3000/socketpeer/',
     reconnect: false,
   });
 
   var peer2 = new SocketPeer({
     pairCode: 'yolo',
-    url: 'http://localhost:3000',
+    url: 'http://localhost:3000/socketpeer/',
     reconnect: false,
   });
 
@@ -90,7 +90,7 @@ test('connect_timeout event gets emitted', function (t) {
 
   var peer = new SocketPeer({
     pairCode: 'yolo',
-    url: 'http://localhost:3000',
+    url: 'http://localhost:3000/socketpeer/',
     timeout: 500
   });
 
@@ -119,13 +119,13 @@ test('message sent over WebSocket when RTC peer disconnects', function (t) {
 
   var peer1 = new SocketPeer({
     pairCode: 'yolo',
-    url: 'http://localhost:3000',
+    url: 'http://localhost:3000/socketpeer/',
     reconnect: false,
   });
 
   var peer2 = new SocketPeer({
     pairCode: 'yolo',
-    url: 'http://localhost:3000',
+    url: 'http://localhost:3000/socketpeer/',
     reconnect: false,
   });
 
@@ -179,12 +179,12 @@ test('socket reconnects', function (t) {
 
   var peer1 = new SocketPeer({
     pairCode: 'yolo',
-    url: 'http://localhost:3000'
+    url: 'http://localhost:3000/socketpeer/'
   });
 
   var peer2 = new SocketPeer({
     pairCode: 'yolo',
-    url: 'http://localhost:3000'
+    url: 'http://localhost:3000/socketpeer/'
   });
 
   peer1.once('connect', tryConnect);
@@ -217,12 +217,12 @@ test('WebRTC reconnects', function (t) {
 
   var peer1 = new SocketPeer({
     pairCode: 'yolo',
-    url: 'http://localhost:3000'
+    url: 'http://localhost:3000/socketpeer/'
   });
 
   var peer2 = new SocketPeer({
     pairCode: 'yolo',
-    url: 'http://localhost:3000'
+    url: 'http://localhost:3000/socketpeer/'
   });
 
   peer1.once('upgrade', tryUpgrade);
