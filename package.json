@@ -1,7 +1,7 @@
 {
   "name": "socketpeer",
   "description": "simple 1:1 messaging via WebRTC Data Channels and WebSockets",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "repository": {
     "type": "git",
     "url": "git://github.com/cvan/socketpeer.git"
