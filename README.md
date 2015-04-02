@@ -174,17 +174,19 @@ Fired when an error occurs. `err` is an `Error` object.
 
 ## Server API
 
-### `peerServer = new SocketPeerServer([server], [opts])`
+### `peerServer = new SocketPeerServer([opts])`
 
 Create a new server for establishing peer connections (i.e., "signalling") and passing WebSocket messages through (if WebRTC Data Channel not supported).
 
-If `server` is specified, that existing server will be used instead. If you pass an `http.Server`, a `ws.Server` will be created and attached to it. Otherwise, pass an existing `ws.Server`.
+If `httpServer` is specified, that existing server will be used instead and a `ws.Server` will be created and attached to it. To use an existing `ws.Server` for signalling, pass `socketServer`.
 
 If `opts` is specified, then the default options (shown below) will be overridden.
 
 ```js
 {
   allowedOrigins: [Array],
+  httpServer: undefined,
+  socketServer: undefined,
   peerTimeout: 60000,
   pairCodeValidator: function (pairCode) {}
 }
