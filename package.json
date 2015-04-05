@@ -50,7 +50,7 @@
     "browserify": "browserify -s SocketPeer -r ./browser/ -o socketpeer.js",
     "minify": "uglifyjs socketpeer.js -c warnings=false -m > socketpeer.min.js",
     "watch": "npm run build && onchange browser/* -- npm run build",
-    "test": "zuul -- test/*.js",
-    "test-local": "zuul --local 3001 -- test/*.js"
+    "test-local": "zuul --local 3001 -- test/*.js",
+    "test": "zuul -- test/*.js"
   }
 }
