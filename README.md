@@ -178,7 +178,7 @@ Fired when an error occurs. `err` is an `Error` object.
 
 Create a new server for establishing peer connections (i.e., "signalling") and passing WebSocket messages through (if WebRTC Data Channel not supported).
 
-If `httpServer` is specified, that existing server will be used instead and a `ws.Server` will be created and attached to it. To use an existing `ws.Server` for signalling, pass `socketServer`.
+If `httpServer` is specified, that existing server will be used instead and a `ws.Server` will be created and attached to it. To use an existing `ws.Server` for signalling, pass `wsServer`.
 
 If `opts` is specified, then the default options (shown below) will be overridden.
 
@@ -186,7 +186,7 @@ If `opts` is specified, then the default options (shown below) will be overridde
 {
   allowedOrigins: [Array],
   httpServer: undefined,
-  socketServer: undefined,
+  wsServer: undefined,
   peerTimeout: 60000,
   pairCodeValidator: function (pairCode) {}
 }
