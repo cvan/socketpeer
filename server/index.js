@@ -9,7 +9,7 @@ var nodeEnv = process.env.NODE_ENVIRONMENT || 'development';
 var WebSocketServer = ws.Server;
 
 
-function Server(opts) {
+function SocketPeerServer(opts) {
   opts = opts || {};
 
   if (!opts.httpServer) {
@@ -144,8 +144,8 @@ function Server(opts) {
 // Immediately start the server if the server is called directly
 // (i.e., not required as a module).
 if (require.main === module) {
-  Server();
+  SocketPeerServer();
 }
 
 
-module.exports = Server;
+module.exports = SocketPeerServer;
