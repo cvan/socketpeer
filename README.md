@@ -58,7 +58,7 @@ To run tests in the cloud:
 
 ### `peer = new SocketPeer([opts])`
 
-Create a new peer WebRTC Data Channel peer connection (only WebSocket if `socketFallback` is `false`).
+Create a new peer WebRTC Data Channel peer connection (only WebRTC if `socketFallback` is `false`).
 
 A "data channel" for text/binary communication is always established, because it's cheap and often useful.
 
