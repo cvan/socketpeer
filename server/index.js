@@ -15,7 +15,18 @@ function SocketPeerServer(opts) {
   if (!opts.httpServer) {
     var host = opts.host || process.env.SOCKETPEER_HOST || process.env.HOST || '0.0.0.0';
     var port = opts.port || process.env.SOCKETPEER_PORT || process.env.PORT || 3000;
-    opts.httpServer = http.createServer();
+    opts.httpServer = http.createServer(function (req, res) {
+      var url = urllib.parse(req.url).pathname;
+
+      if (nodeEnv === 'development') {
+        // For demo purposes.
+        if (url === '/' || url === '/demo/') {
+          // res.writeHead(200, {'Content-Type': 'text/html'});
+          var stream = fs.createReadStream(path.join(__dirname, '..', 'demo', 'index.html'));
+          stream.pipe(res);
+        }
+      }
+    });
 
     opts.httpServer.listen(port, host, function () {
       console.log('[%s] Server listening on %s:%s', nodeEnv, host, port);
