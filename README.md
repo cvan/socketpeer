@@ -131,6 +131,10 @@ Fired when a connection timeout occurs.
 
 Received a message from the remote peer.
 
+### `peer.on('disconnect', function () {})`
+
+Fired when the peer connection is lost.
+
 ### `peer.on('reconnect', function (data) {})`
 
 Fired when a reconnection occurs.

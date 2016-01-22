@@ -142,6 +142,7 @@ function SocketPeerServer(opts) {
       }
 
       if (client.peer) {
+        client.peer.sendMessage('peer.lost');
         peersWaiting[client.pairCode] = client.peer;
         closeConnection(client.pairCode);
       }
