@@ -74,7 +74,8 @@ If `opts` is specified, then the default options (shown below) will be overridde
   reconnectDelay: 1000,
   timeout: 10000,
   autoconnect: true,
-  serveLibrary: true
+  serveLibrary: true,
+  debug: false
 }
 ```
 
@@ -89,6 +90,7 @@ The options do the following:
 * `timeout` - how long to wait (ms) before abandoning connection
 * `autoconnect` - when `true`, automatically connects upon page load
 * `serveLibrary` - when `true`, serves library at `/socketpeer/socketpeer.js`
+* `debug` - when `true`, logs debugging information to the console
 
 ### `peer.connect()`
 

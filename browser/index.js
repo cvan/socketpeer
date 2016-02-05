@@ -39,7 +39,8 @@ function SocketPeer(opts) {
     reconnect: 'reconnect' in opts ? opts.reconnect : true,
     reconnectDelay: 'reconnectDelay' in opts ? opts.reconnectDelay : 1000,
     timeout: 'timeout' in opts ? opts.timeout : 0,
-    autoconnect: 'autoconnect' in opts ? opts.autoconnect : true
+    autoconnect: 'autoconnect' in opts ? opts.autoconnect : true,
+    debug: 'debug' in opts ? opts.debug : false
   }, opts);
 
   self._debug('New peer');
@@ -302,9 +303,11 @@ SocketPeer.prototype.destroyPeer = function() {
 
 SocketPeer.prototype._debug = function () {
   var self = this;
-  var args = Array.prototype.slice.call(arguments);
-  args[0] = '[' + self.pairCode + '] ' + args[0];
-  console.log.apply(console, args);
+  if (self.debug) {
+    var args = Array.prototype.slice.call(arguments);
+    args[0] = '[' + self.pairCode + '] ' + args[0];
+    console.log.apply(console, args);
+  }
 };
 
 
