@@ -2,6 +2,7 @@
 
 Simple 1:1 messaging via WebRTC Data Channels and WebSockets.
 
+__[Read this great article.](https://hacks.mozilla.org/2015/04/peering-through-the-webrtc-fog-with-socketpeer/)__
 
 ## Features
 
