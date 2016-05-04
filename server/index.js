@@ -25,6 +25,11 @@ function SocketPeerServer(opts) {
           var stream = fs.createReadStream(path.join(__dirname, '..', 'demo', 'index.html'));
           stream.pipe(res);
         }
+        if (url === '/media/') {
+          // res.writeHead(200, {'Content-Type': 'text/html'});
+          var stream = fs.createReadStream(path.join(__dirname, '..', 'demo', 'media.html'));
+          stream.pipe(res);
+        }
       }
     });
 

@@ -35,6 +35,7 @@ function SocketPeer(opts) {
     pairCode: 'pairCode' in opts ? opts.pairCode : null,
     socketFallback: 'socketFallback' in opts ? opts.socketFallback : true,
     socket: 'socket' in opts ? opts.socket : null,
+    stream: 'stream' in opts ? opts.stream : null,
     url: 'url' in opts ? opts.url : 'http://localhost',
     reconnect: 'reconnect' in opts ? opts.reconnect : true,
     reconnectDelay: 'reconnectDelay' in opts ? opts.reconnectDelay : 1000,
@@ -181,7 +182,8 @@ SocketPeer.prototype._rtcInit = function () {
   }
 
   self.peer = new SimplePeer({
-    initiator: self.initiator
+    initiator: self.initiator,
+    stream: self.stream
   });
 
   self.peer.on('connect', function () {
@@ -190,6 +192,10 @@ SocketPeer.prototype._rtcInit = function () {
     self._connections.rtc.attempt = 0;
     self.rtcConnected = true;
     self.emit('upgrade');
+  });
+
+  self.peer.on('stream', function (stream) {
+    self.emit('stream', stream);
   });
 
   self.peer.on('error', function (err) {

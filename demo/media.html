@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="none">
+    <title>SocketPeer demo</title>
+    <style>
+      body { color: #333; font: 2em monospace; }
+      .main { margin: 1em 10%; }
+      p { color: #333; }
+      .projectName { background: yellow; color: #666; display: inline-block; font-size: 1.5em; font-weight: 300; margin-bottom: .5em; padding: .2em .4em; }
+      .projectName b { color: #000; font-weight: 600; }
+    </style>
+  </head>
+  <body>
+    <main id="main" class="main">
+      <h1 class="projectName"><b>SocketPeer</b> Media demo</h1>
+      <button class="start">start</button>
+      <button class="start-nostream">no stream</button>
+    </main>
+    <footer id="footer"></footer>
+    <script src="/socketpeer/socketpeer.js"></script>
+    <script>
+
+      function _append(msg) {
+        main.innerHTML += '<p>' + msg + '</p>';
+        footer.scrollIntoView();
+      }
+
+      function error(msg) {
+        console.error(msg);
+        _append(msg);
+      }
+
+      function log(msg) {
+        console.log(msg);
+        _append(msg);
+      }
+
+    </script>
+    <script>
+      (function () {
+
+        log('waiting');
+
+        document.querySelector('.start').addEventListener('click', function (e) {
+          log('getUserMedia');
+          navigator.mediaDevices.getUserMedia({video: true}).then(function (stream) {
+            log('got stream');
+            startWithStream(stream);
+          });
+        });
+
+        document.querySelector('.start-nostream').addEventListener('click', function (e) {
+          startWithStream();
+        });
+
+        function startWithStream (stream) {
+          var peer = new SocketPeer({
+            pairCode: 'yolo-stream',
+            stream: stream,
+            url: 'http://localhost:3000/socketpeer/'
+          });
+
+          peer.on('connect', function () {
+            log('connected');
+          });
+
+          peer.on('connect_timeout', function () {
+            error('connect_timeout');
+          });
+
+          peer.on('data', function (data) {
+            log('data: ' + data);
+          });
+
+          peer.on('busy', function () {
+            error('pairCode already in use');
+          });
+
+          peer.on('rtc.signal', function () {
+            log('rtc.signal');
+          });
+
+          peer.on('peer.found', function () {
+            log('peer.found');
+            peer.send('hello');
+          });
+
+          peer.on('upgrade', function () {
+            log('upgrade');
+            peer.send('upgraded');
+          });
+
+          peer.on('upgrade_attempt', function () {
+            log('upgrade_attempt');
+          });
+
+          peer.on('downgrade', function () {
+            log('downgrade');
+          });
+
+          peer.on('error', function (err) {
+            error('error: ' + err);
+          });
+
+          peer.on('stream', function (stream) {
+            log('stream');
+            var video = document.createElement('video');
+            main.appendChild(video);
+            video.src = window.URL.createObjectURL(stream);
+            video.onloadedmetadata = function(e) {
+              log('video play');
+              video.play();
+            };
+          });
+
+          window.peer = peer;
+
+        }
+
+      })();
+    </script>
+  </body>
+</html>
