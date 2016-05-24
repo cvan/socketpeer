@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "inherits": "^2.0.1",
-    "simple-peer": "^4.0.2",
+    "simple-peer": "cvan/simple-peer#only-data-channels",
     "ws": "^0.7.1",
     "xtend": "^4.0.0"
   },
