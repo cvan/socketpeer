@@ -5,7 +5,7 @@ var urllib = require('url');
 
 var ws = require('ws');
 
-var nodeEnv = process.env.NODE_ENVIRONMENT || 'development';
+var nodeEnv = process.env.NODE_ENV || 'development';
 var WebSocketServer = ws.Server;
 
 
