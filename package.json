@@ -43,7 +43,7 @@
   "main": "server/index.js",
   "browser": "browser/index.js",
   "scripts": {
-    "start": "NODE_ENVIRONMENT=production node server",
+    "start": "npm run dev",
     "dev": "NODE_ENVIRONMENT=development nodemon server",
     "prod": "NODE_ENVIRONMENT=production node server",
     "build": "npm run browserify && npm run minify",
