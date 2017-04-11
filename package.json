@@ -20,6 +20,7 @@
     "browserify": "^9.0.3",
     "nodemon": "^1.3.7",
     "onchange": "^1.0.0",
+    "release-it": "^2.7.1",
     "semistandard": "^10.0.0",
     "snazzy": "^7.0.0",
     "tape": "^3.5.0",
@@ -62,7 +63,11 @@
     "pretest": "npm run lint",
     "test": "zuul -- test/*.js",
     "pretest-local": "npm run lint",
-    "test-local": "zuul --local 3001 -- test/*.js"
+    "test-local": "zuul --local 3001 -- test/*.js",
+    "release": "release-it",
+    "release-major": "npm run release -- --increment major",
+    "release-minor": "npm run release -- --increment minor",
+    "release-patch": "npm run release -- --increment patch"
   },
   "semistandard": {
     "ignore": [
