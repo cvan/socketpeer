@@ -21,17 +21,19 @@
     <script src="/socketpeer/socketpeer.js"></script>
     <script>
 
-      function _append(msg) {
+      var footerEl = document.querySelector('#footer');
+
+      function _append (msg) {
         main.innerHTML += '<p>' + msg + '</p>';
         footer.scrollIntoView();
       }
 
-      function error(msg) {
+      function error (msg) {
         console.error(msg);
         _append(msg);
       }
 
-      function log(msg) {
+      function log (msg) {
         console.log(msg);
         _append(msg);
       }
