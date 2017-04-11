@@ -6,10 +6,11 @@
     <meta name="robots" content="none">
     <title>SocketPeer demo</title>
     <style>
-      body { color: #333; font: 2em monospace; }
-      .main { margin: 1em 10%; }
+      html { font-size: 12px; }
+      body { color: #333; font: 1.5rem/1.3 monospace; }
+      .main { margin: 3vw 10%; }
       p { color: #333; }
-      .projectName { background: yellow; color: #666; display: inline-block; font-size: 1.5em; font-weight: 300; margin-bottom: .5em; padding: .2em .4em; }
+      .projectName { background: yellow; color: #666; display: inline-block; font-size: 2.5rem; font-weight: 300; margin-bottom: .5rem; position: relative; left: -1rem; padding: .5rem 1rem; }
       .projectName b { color: #000; font-weight: 600; }
     </style>
   </head>
@@ -31,12 +32,12 @@
       }
 
       function error (msg) {
-        console.error(msg);
+        console.error.call(console, arguments);
         _append(msg);
       }
 
       function log (msg) {
-        console.log(msg);
+        console.log.call(console, arguments);
         _append(msg);
       }
 
@@ -66,45 +67,45 @@
           });
 
           peer.on('connect', function () {
-            log('connected');
+            log('peer connected');
           });
 
           peer.on('connect_timeout', function () {
-            error('connect_timeout');
+            error('connection timed out (after ' + peer.timeout + ' ms)');
           });
 
           peer.on('data', function (data) {
-            log('data: ' + data);
+            log('data received: ' + JSON.stringify(data));
           });
 
           peer.on('busy', function () {
-            error('pairCode already in use');
+            error('`pairCode` "' + peer.pairCode + '" is already in use');
           });
 
           peer.on('rtc.signal', function () {
-            log('rtc.signal');
+            log('WebRTC signalling');
           });
 
-          peer.on('peer.found', function () {
-            log('peer.found');
+          peer.on('peer.found', function (data) {
+            log('peer found:', data.initiator);
             peer.send('hello');
           });
 
           peer.on('upgrade', function () {
-            log('upgrade');
+            log('successfully upgraded WebSocket ⇒ to WebRTC peer connection');
             peer.send('upgraded');
           });
 
           peer.on('upgrade_attempt', function () {
-            log('upgrade_attempt');
+          log('attempting to upgrade WebSocket ⇒ to WebRTC peer connection (attempt number: ' + peer._connections.rtc.attempt + ')');
           });
 
           peer.on('downgrade', function () {
-            log('downgrade');
+            log('downgraded WebRTC peer connection ⇒ to WebSocket connection');
           });
 
           peer.on('error', function (err) {
-            error('error: ' + err);
+            error('error:', err);
           });
 
           peer.on('stream', function (stream) {
@@ -112,8 +113,8 @@
             var video = document.createElement('video');
             main.appendChild(video);
             video.src = window.URL.createObjectURL(stream);
-            video.onloadedmetadata = function(e) {
-              log('video play');
+            video.onloadedmetadata = function (evt) {
+              log('playing video', evt);
               video.play();
             };
           });

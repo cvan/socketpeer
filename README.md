@@ -1,58 +1,162 @@
-# socketpeer
+# SocketPeer
 
-Simple 1:1 messaging via WebRTC Data Channels and WebSockets.
+Simple 1:1 messaging via [WebRTC Data Channels](https://developer.mozilla.org/en-US/docs/Web/API/RTCDataChannel) and [WebSockets](https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API).
 
-__[Read this great article.](https://hacks.mozilla.org/2015/04/peering-through-the-webrtc-fog-with-socketpeer/)__
+[Read this great **walk-through article**.](https://hacks.mozilla.org/2015/04/peering-through-the-webrtc-fog-with-socketpeer/)
+
+[**View a live demo** of a project using SocketPeer!](https://socketpeer-test.herokuapp.com/) See the (project's [source code](https://github.com/potch/test-socketpeer)).
+
 
 ## Features
 
-* concise, Node.js-style API for **[WebRTC](https://en.wikipedia.org/wiki/WebRTC)**
+* concise, [Node.js](https://nodejs.org/)-style API for **[WebRTC](https://en.wikipedia.org/wiki/WebRTC)** peer-to-peer connections
 * simple 1:1 peer connection signalling, pairing, and messaging
-* fallback to WebSockets if WebRTC Data Channels are unsupported
+* fallback WebSocket support if WebRTC Data Channels are unsupported
 * automatic reconnection if peer connections prematurely close
-
-This module works great in the browser with [browserify](http://browserify.org/).
-
-**NOTE:** If you are **not** using browserify, then use the included standalone file
-`socketpeer.min.js`. This exports a `SocketPeer` function on `window`.
+* exports as a [UMD](https://github.com/umdjs/umd) module, so the library works everywhere (i.e., using [Browserify](http://browserify.org/), [webpack](https://webpack.js.org/), or included by a `<script>` tag in any modern browser)
 
 
-## Installation
+## Usage
 
-To install from npm:
+If you are requiring `socketpeer` as a Node package using npm/yarn + Browserify/Webpack, install `socketpeer` from your project directory like so:
 
-    npm install socketpeer
+```sh
+npm install socketpeer --save
+```
 
-To install the Node dependencies from the git repository:
+> **NOTE:** If you are **not** using Browserify or webpack, then use the included standalone file, [`socketpeer.min.js`](socketpeer.min.js), which exports to `window` a function called `SocketPeer`.
 
-    npm install
+[Read this great **walk-through article**.](https://hacks.mozilla.org/2015/04/peering-through-the-webrtc-fog-with-socketpeer/)
+
+[**View a live demo** of a project using SocketPeer!](https://socketpeer-test.herokuapp.com/) See the (project's [source code](https://github.com/potch/test-socketpeer)).
+
+Additionally, here's some sample code to quickly get you started using `socketpeer`:
+
+```js
+var socketpeer = require('socketpeer');
+
+var peer = new SocketPeer({
+  pairCode: 'yolo',
+  url: 'http://localhost:3000/socketpeer/'
+});
+
+peer.on('connect', function () {
+  console.log('peer connected');
+});
+
+peer.on('connect_timeout', function () {
+  console.error('connection timed out (after %s ms)', peer.timeout);
+});
+
+peer.on('data', function (data) {
+  console.log('data received:', data);
+});
+
+peer.on('busy', function () {
+  console.error('`pairCode` "%s" is already in use', peer.pairCode);
+});
+
+peer.on('rtc.signal', function () {
+  console.log('WebRTC signalling');
+});
+
+peer.on('peer.found', function (data) {
+  console.log('peer found:', data.initiator);
+  peer.send('hello');
+});
+
+peer.on('upgrade', function () {
+  console.log('successfully upgraded WebSocket ⇒ to WebRTC peer connection');
+  peer.send('upgraded');
+});
+
+peer.on('upgrade_attempt', function () {
+  console.log('attempting to upgrade WebSocket ⇒ to WebRTC peer connection (attempt number: %d)', peer._connections.rtc.attempt);
+});
+
+peer.on('downgrade', function () {
+  console.log('downgraded WebRTC peer connection ⇒ to WebSocket connection');
+});
+
+peer.on('error', function (err) {
+  console.error('error:', err);
+});
+```
+
+For more examples, refer to the [`demo` directory](https://github.com/cvan/socketpeer/tree/master/demo).
 
 
 ## Development
 
-To run the browserify watcher (files are output to the `build/` directory):
+### Installation
 
+1. If you haven't already, install [Node.js](https://nodejs.org/en/download/package-manager/) (which includes [npm](https://www.npmjs.com/)).
+2. Clone this repository ([`cvan/socketpeer`](https://github.com/cvan/socketpeer)):
+
+    ```sh
+    git clone git@github.com:cvan/socketpeer.git
+    ```
+3. In the root directory of the cloned repository of the project, install the [Node](https://nodejs.org/en/download/package-manager/) dependencies:
+
+    ```sh
+    cd cvan/socketpeer/
+    npm install
+    ```
+
+4. When all the latest dependencies are installed, from the `socketpeer/` directory, run these commands (each in a separate terminal tab):
+
+    ```sh
+    # Start the server for local development (includes server live-reloading).
+    npm start
+
+    # Run the Browserify watcher (files are written to the `build/` directory).
     npm run watch
+    ```
 
-To create the browserify bundles (files are output to the `build/` directory):
-
-    npm run build
+    This will generate a non-minified version of the library and will run a watcher which recompiles the `socketpeer` library when local changes are saved to disk.
 
 
-## Testing
+### Commands (`npm` scripts) for local development
 
-Set these up locally:
+* **`npm run build`** (or `npm run dist`) – builds the distribution-ready files for `SocketPeer` (i.e., [`socketpeer.js`](socketpeer.js), [`socketpeer.min.js`](socketpeer.min.js)), to the root project directory.
+* **`npm start`** (or `npm run dev`) – builds the development version of the library and runs a file watcher.
+* **`npm run test`** – runs the tests.
+* **`npm run test-local`** – runs the tests in a continuous-watch mode (useful for local, test-driven development).
+
+
+## Distribution
+
+To build the Browserify bundles:
+
+```sh
+npm run build
+```
+
+Two files will be written to this project's root directory:
+
+* **[`socketpeer.js`](socketpeer.js)** – the development/debug-purposed, unminified version of `SocketPeer` (UMD-compatible).
+* **[`socketpeer.min.js`](socketpeer.min.js)** – the production-ready, minified version of `SocketPeer` (UMD-compatible).
+
+
+
+## Tests
+
+Refer to these docs for setting up continuous-integration testing locally:
 
 * [Sauce Labs](https://github.com/defunctzombie/zuul/wiki/cloud-testing)
 * [Travis CI](https://github.com/defunctzombie/zuul/wiki/Travis-ci)
 
-To run tests locally:
+To run the tests intended for a local environment:
 
-    npm run test-local
+```sh
+npm run test-local
+```
 
-To run tests in the cloud:
+To run the tests in "the cloud" (e.g., [Sauce Labs](https://saucelabs.com/), [Travis CI](https://travis-ci.org/)):
 
-    npm test
+```sh
+npm test
+```
 
 
 ## Client API
@@ -87,11 +191,11 @@ The options do the following:
 * `socket` - custom instance of a WebSocket connection to reuse
 * `url` - URL to WebSocket server
 * `reconnect` - when `true`, reconnects if peer connection drops
-* `reconnectDelay` - if `reconnect` is set, how long to (ms) wait before reconnecting
-* `timeout` - how long to wait (ms) before abandoning connection
+* `reconnectDelay` - if `reconnect` is set, how long to wait (in milliseconds) before reconnecting
+* `timeout` - how long to wait (in milliseconds) before abandoning connection
 * `autoconnect` - when `true`, automatically connects upon page load
 * `serveLibrary` - when `true`, serves library at `/socketpeer/socketpeer.js`
-* `debug` - when `true`, logs debugging information to the console
+* `debug` - when `true`, logs debugging information to the `console`
 
 ### `peer.connect()`
 
@@ -197,8 +301,8 @@ If `opts` is specified, then the default options (shown below) will be overridde
 
 The options do the following:
 
-* `allowedOrigins` - array of allowed origins (optional)
-* `peerTimeout` - how long to wait before abandoning peer connection (defaults to 6000 ms, 1 minute)
+* `allowedOrigins` - array of allowed/whitelisted origins (optional)
+* `peerTimeout` - how long to wait (in milliseconds) before abandoning peer connection (defaults to 6000 milliseconds / 1 minute)
 * `pairCodeValidator` - function that allows custom validation on the `pairCode` passed from the client (optional)
 
 ### `peerServer.socket`
@@ -214,11 +318,18 @@ A property that links to the instance of `http.Server`.
 Breaks both ends of a peer connection (WebSocket or WebRTC).
 
 
-## Licence
-
-[MIT Licence](LICENCE)
-
-
 ## Contributing
 
 [Contributions are very welcome!](CONTRIBUTING.md)
+
+
+## Acknowledgments
+
+Thank you to the following projects and individuals:
+
+* [`simple-peer`](https://github.com/feross/simple-peer) (Licensed under [MIT](https://github.com/feross/simple-peer/blob/master/LICENSE))
+
+
+## Licence
+
+[MIT Licence.](LICENCE)
