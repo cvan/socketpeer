@@ -1,9 +1,7 @@
 var SocketPeer = require('../browser');
 var test = require('tape');
 
-
 test('connect_attempt event gets emitted', function (t) {
-
   var peer = new SocketPeer({
     pairCode: 'yolo',
     url: 'http://localhost:3000/socketpeer/',
@@ -24,22 +22,19 @@ test('connect_attempt event gets emitted', function (t) {
   peer.on('error', function (err) {
     console.warn('Ignoring error: %s', err.message);
   });
-
 });
 
-
 test('basic lifecycle', function (t) {
-
   var peer1 = new SocketPeer({
     pairCode: 'yolo',
     url: 'http://localhost:3000/socketpeer/',
-    reconnect: false,
+    reconnect: false
   });
 
   var peer2 = new SocketPeer({
     pairCode: 'yolo',
     url: 'http://localhost:3000/socketpeer/',
-    reconnect: false,
+    reconnect: false
   });
 
   peer1.on('connect', function () {
@@ -57,7 +52,7 @@ test('basic lifecycle', function (t) {
     tryConnect();
   });
 
-  function tryConnect() {
+  function tryConnect () {
     if (peer1.socketConnected && peer2.socketConnected) {
       t.ok(true, 'connected');
 
@@ -82,12 +77,9 @@ test('basic lifecycle', function (t) {
       });
     }
   }
-
 });
 
-
 test('connect_timeout event gets emitted', function (t) {
-
   var peer = new SocketPeer({
     pairCode: 'yolo',
     url: 'http://localhost:3000/socketpeer/',
@@ -111,35 +103,32 @@ test('connect_timeout event gets emitted', function (t) {
     peer.destroy();
     t.end();
   });
-
 });
 
-
 test('message sent over WebSocket when RTC peer disconnects', function (t) {
-
   var peer1 = new SocketPeer({
     pairCode: 'yolo',
     url: 'http://localhost:3000/socketpeer/',
-    reconnect: false,
+    reconnect: false
   });
 
   var peer2 = new SocketPeer({
     pairCode: 'yolo',
     url: 'http://localhost:3000/socketpeer/',
-    reconnect: false,
+    reconnect: false
   });
 
   peer1.on('upgrade', tryUpgrade);
   peer2.on('upgrade', tryUpgrade);
 
-  function tryUpgrade() {
+  function tryUpgrade () {
     if (peer1.rtcConnected && peer2.rtcConnected) {
       t.ok(true, 'connected');
       sendPing();
     }
   }
 
-  function sendPing() {
+  function sendPing () {
     peer1.send('ping');
 
     peer2.on('data', function (data) {
@@ -150,7 +139,7 @@ test('message sent over WebSocket when RTC peer disconnects', function (t) {
     });
   }
 
-  function sendPong() {
+  function sendPong () {
     peer2.on('downgrade', function () {
       t.equal(peer2.rtcConnected, false, 'peer2.rtcConnected');
 
@@ -171,12 +160,9 @@ test('message sent over WebSocket when RTC peer disconnects', function (t) {
 
     peer2.destroyPeer();
   }
-
 });
 
-
 test('socket reconnects', function (t) {
-
   var peer1 = new SocketPeer({
     pairCode: 'yolo',
     url: 'http://localhost:3000/socketpeer/'
@@ -190,7 +176,7 @@ test('socket reconnects', function (t) {
   peer1.once('connect', tryConnect);
   peer2.once('connect', tryConnect);
 
-  function tryConnect() {
+  function tryConnect () {
     if (peer1.socketConnected && peer2.socketConnected) {
       t.ok(true, 'connected');
 
@@ -206,15 +192,11 @@ test('socket reconnects', function (t) {
       setTimeout(function () {
         peer1.socket.close();
       }, 0);
-
     }
   }
-
 });
 
-
 test('WebRTC reconnects', function (t) {
-
   var peer1 = new SocketPeer({
     pairCode: 'yolo',
     url: 'http://localhost:3000/socketpeer/'
@@ -228,7 +210,7 @@ test('WebRTC reconnects', function (t) {
   peer1.once('upgrade', tryUpgrade);
   peer2.once('upgrade', tryUpgrade);
 
-  function tryUpgrade() {
+  function tryUpgrade () {
     if (peer1.rtcConnected && peer2.rtcConnected) {
       t.ok(true, 'upgrade');
 
@@ -251,5 +233,4 @@ test('WebRTC reconnects', function (t) {
       peer1.destroyPeer();
     }
   }
-
 });

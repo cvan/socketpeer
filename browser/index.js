@@ -1,18 +1,19 @@
+/* jshint browserify: true */
+/* global WebSocket */
+
 var events = require('events');
 var inherits = require('inherits');  // A tiny lib containing `util.inherits`.
 
 var extend = require('xtend/mutable');
 var SimplePeer = require('simple-peer');
 
-
 var EventEmitter = events.EventEmitter;
-
 
 /**
  * A WebRTC/WebSocket peer connection.
  * @param {Object} opts
  */
-function SocketPeer(opts) {
+function SocketPeer (opts) {
   var self = this;
 
   if (!(self instanceof SocketPeer)) {
@@ -82,9 +83,7 @@ function SocketPeer(opts) {
   }
 }
 
-
 inherits(SocketPeer, EventEmitter);
-
 
 SocketPeer.prototype.pair = function (pairCode) {
   var self = this;
@@ -95,7 +94,6 @@ SocketPeer.prototype.pair = function (pairCode) {
 
   self._send('pair', self.pairCode);
 };
-
 
 SocketPeer.prototype.connect = function () {
   var self = this;
@@ -156,7 +154,6 @@ SocketPeer.prototype.connect = function () {
   }
 };
 
-
 SocketPeer.prototype._socketError = function (err) {
   var self = this;
   self._connections.socket.error++;
@@ -167,12 +164,10 @@ SocketPeer.prototype._socketError = function (err) {
   }
 };
 
-
 SocketPeer.prototype._calcReconnectTimeout = function (attempts) {
   var self = this;
   return Math.min(Math.pow(2, attempts) * self.reconnectDelay, 30000);
 };
-
 
 SocketPeer.prototype._rtcInit = function () {
   var self = this;
@@ -240,14 +235,12 @@ SocketPeer.prototype._rtcInit = function () {
   self.emit('upgrade_attempt');
 };
 
-
 SocketPeer.prototype._rtcSignal = function (data) {
   var self = this;
   if (!self.rtcConnected && self.peer && !self.peer.destroyed) {
     self.peer.signal(data);
   }
 };
-
 
 SocketPeer.prototype._send = function (type, data) {
   var self = this;
@@ -263,7 +256,6 @@ SocketPeer.prototype._send = function (type, data) {
   self.socket.send(data);
 };
 
-
 SocketPeer.prototype.send = function (data) {
   var self = this;
   if (self.rtcConnected) {
@@ -273,7 +265,6 @@ SocketPeer.prototype.send = function (data) {
   }
 };
 
-
 SocketPeer.prototype.close = function () {
   var self = this;
   self.destroyPeer();
@@ -282,8 +273,7 @@ SocketPeer.prototype.close = function () {
   }
 };
 
-
-SocketPeer.prototype.destroy = function() {
+SocketPeer.prototype.destroy = function () {
   var self = this;
   self.reconnect = false;
   self.close();
@@ -296,8 +286,7 @@ SocketPeer.prototype.destroy = function() {
   clearTimeout(self._rtcReconnectTimeout);
 };
 
-
-SocketPeer.prototype.destroyPeer = function() {
+SocketPeer.prototype.destroyPeer = function () {
   var self = this;
   if (self.peer) {
     self.peer.destroy();
@@ -305,7 +294,6 @@ SocketPeer.prototype.destroyPeer = function() {
   self.peer = null;
   self.rtcConnected = false;
 };
-
 
 SocketPeer.prototype._debug = function () {
   var self = this;
@@ -315,6 +303,5 @@ SocketPeer.prototype._debug = function () {
     console.log.apply(console, args);
   }
 };
-
 
 module.exports = SocketPeer;

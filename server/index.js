@@ -1,45 +1,48 @@
-var fs = require('fs');
-var http = require('http');
-var path = require('path');
-var urllib = require('url');
+/* jshint node: true */
 
-var ws = require('ws');
+const fs = require('fs');
+const http = require('http');
+const path = require('path');
+const urllib = require('url');
 
-var nodeEnv = process.env.NODE_ENV || 'development';
-var WebSocketServer = ws.Server;
+const ws = require('ws');
 
+const nodeEnv = process.env.NODE_ENV || 'development';
+const WebSocketServer = ws.Server;
 
-function SocketPeerServer(opts) {
+function SocketPeerServer (opts) {
   opts = opts || {};
 
   if (!opts.httpServer) {
-    var host = opts.host || process.env.SOCKETPEER_HOST || process.env.HOST || '0.0.0.0';
-    var port = opts.port || process.env.SOCKETPEER_PORT || process.env.PORT || 3000;
-    opts.httpServer = http.createServer(function (req, res) {
+    const host = opts.host || process.env.SOCKETPEER_HOST || process.env.HOST || '0.0.0.0';
+    const port = opts.port || process.env.SOCKETPEER_PORT || process.env.PORT || 3000;
+
+    opts.httpServer = http.createServer((req, res) => {
       var url = urllib.parse(req.url).pathname;
 
       if (nodeEnv === 'development') {
+        let stream;
         // For demo purposes.
         if (url === '/' || url === '/demo/') {
           // res.writeHead(200, {'Content-Type': 'text/html'});
-          var stream = fs.createReadStream(path.join(__dirname, '..', 'demo', 'index.html'));
+          stream = fs.createReadStream(path.join(__dirname, '..', 'demo', 'index.html'));
           stream.pipe(res);
         }
         if (url === '/media/') {
           // res.writeHead(200, {'Content-Type': 'text/html'});
-          var stream = fs.createReadStream(path.join(__dirname, '..', 'demo', 'media.html'));
+          stream = fs.createReadStream(path.join(__dirname, '..', 'demo', 'media.html'));
           stream.pipe(res);
         }
       }
     });
 
-    opts.httpServer.listen(port, host, function () {
+    opts.httpServer.listen(port, host, () => {
       console.log('[%s] Server listening on %s:%s', nodeEnv, host, port);
     });
   }
 
   if (typeof opts.serveLibrary === 'undefined' || opts.serveLibrary) {
-    opts.httpServer.on('request', function (req, res) {
+    opts.httpServer.on('request', (req, res) => {
       var url = urllib.parse(req.url).pathname;
       if (url === '/socketpeer/socketpeer.js') {
         res.writeHead(200, {'Content-Type': 'text/javascript'});
@@ -59,34 +62,33 @@ function SocketPeerServer(opts) {
   var peersWaiting = Object.create(null);
   var connections = Object.create(null);
 
-  function closeConnection(pairCode) {
-    connections[pairCode].forEach(function (conn) {
+  function closeConnection (pairCode) {
+    connections[pairCode].forEach(conn => {
       conn.peer = null;
     });
     connections[pairCode] = null;
   }
 
-  function sendMessage(type, data) {
+  function sendMessage (type, data) {
     this.send(JSON.stringify({
       type: type,
       data: data
     }));
   }
 
-  opts.wsServer.on('connection', function connection(client) {
-
+  opts.wsServer.on('connection', client => {
     client.sendMessage = sendMessage.bind(client);
 
     console.log('Connection');
 
-    client.on('message', function incoming(msg) {
+    client.on('message', msg => {
       console.log('[message] Received message: %s', msg);
 
       var obj = JSON.parse(msg);
       client.emit('message.' + obj.type, obj.data);
     });
 
-    client.on('message.data', function (data) {
+    client.on('message.data', data => {
       console.log('[pair] Received data:', data);
 
       if (client.peer) {
@@ -94,7 +96,7 @@ function SocketPeerServer(opts) {
       }
     });
 
-    client.on('message.pair', function (pairCode) {
+    client.on('message.pair', pairCode => {
       console.log('[pair] Received pairCode:', pairCode);
 
       if (connections[pairCode]) {
@@ -122,8 +124,9 @@ function SocketPeerServer(opts) {
       }
     });
 
-    client.on('message.rtc.signal', function (data) {
+    client.on('message.rtc.signal', data => {
       console.log('[rtc.signal] Signal recieved');
+
       if (client.peer) {
         client.peer.sendMessage('rtc.signal', data);
       } else {
@@ -131,7 +134,7 @@ function SocketPeerServer(opts) {
       }
     });
 
-    client.on('message.rtc.connect', function () {
+    client.on('message.rtc.connect', () => {
       console.log('[rtc.connect] Received');
 
       if (client.peer) {
@@ -139,10 +142,9 @@ function SocketPeerServer(opts) {
       }
     });
 
-    client.on('close', function () {
+    client.on('close', () => {
       if (client.pairCode in peersWaiting &&
           peersWaiting[client.pairCode] === client) {
-
         peersWaiting[client.pairCode] = null;
       }
 
@@ -156,12 +158,10 @@ function SocketPeerServer(opts) {
   return opts.httpServer;
 }
 
-
 // Immediately start the server if the server is called directly
 // (i.e., not required as a module).
 if (require.main === module) {
   SocketPeerServer();
 }
-
 
 module.exports = SocketPeerServer;
