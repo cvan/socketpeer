@@ -18,13 +18,13 @@ Simple 1:1 messaging via [WebRTC Data Channels](https://developer.mozilla.org/en
 
 ## Usage
 
-If you are requiring `socketpeer` as a Node package using npm/yarn + Browserify/Webpack, install `socketpeer` from your project directory like so:
+If you are requiring `socketpeer` as a Node package using [`npm`](https://www.npmjs.com)/[`yarn`](https://yarnpkg.com/) + [Browserify](http://browserify.org/)/[webpack](https://webpack.js.org/), install the [`socketpeer` package](https://www.npmjs.com/package/socketpeer) from your project directory like so:
 
 ```sh
 npm install socketpeer --save
 ```
 
-> **NOTE:** If you are **not** using Browserify or webpack, then use the included standalone file, [`socketpeer.min.js`](socketpeer.min.js), which exports to `window` a function called `SocketPeer`.
+> **NOTE:** If you are **not** using Browserify/webpack, then use the included standalone file, [`socketpeer.min.js`](socketpeer.min.js), which exports to `window` a function called `SocketPeer`.
 
 [Read this great **walk-through article**.](https://hacks.mozilla.org/2015/04/peering-through-the-webrtc-fog-with-socketpeer/)
 
@@ -90,7 +90,7 @@ For more examples, refer to the [`demo` directory](https://github.com/cvan/socke
 
 ### Installation
 
-1. If you haven't already, install [Node.js](https://nodejs.org/en/download/package-manager/) (which includes [npm](https://www.npmjs.com/)).
+1. If you haven't already, install [Node.js](https://nodejs.org/en/download/package-manager/) (which includes [`npm`](https://www.npmjs.com/)).
 2. Clone this repository ([`cvan/socketpeer`](https://github.com/cvan/socketpeer)):
 
     ```sh
@@ -122,7 +122,7 @@ For more examples, refer to the [`demo` directory](https://github.com/cvan/socke
 * **`npm start`** (or `npm run dev`) – builds the development version of the library and runs a file watcher.
 * **`npm run test`** – runs the tests.
 * **`npm run test-local`** – runs the tests in a continuous-watch mode (useful for local, test-driven development).
-
+* **`npm run release`** – deploy the current project directory as a module to `npm` as the [`socketpeer` package](https://www.npmjs.com/package/socketpeer).
 
 ## Distribution
 
