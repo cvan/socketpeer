@@ -49,6 +49,10 @@
           log('connected');
         });
 
+        peer.on('disconnect', function () {
+          log('disconnected');
+        });
+
         peer.on('connect_timeout', function () {
           error('connect_timeout');
         });
