@@ -106,22 +106,27 @@ function SocketPeerServer (opts) {
 
       client.pairCode = pairCode;
 
-      var waiting = peersWaiting[pairCode];
+      (peersWaiting[pairCode] || []).forEach(waiting => {
+        if (waiting && waiting !== client) {
+          console.log('[pair] Other peer found');
 
-      if (waiting && waiting !== client) {
-        console.log('[pair] Other peer found');
-
-        client.peer = waiting;
-        waiting.peer = client;
-        connections[pairCode] = [client, waiting];
-        peersWaiting[pairCode] = null;
-        waiting.sendMessage('peer.found', {initiator: false});
-        client.sendMessage('peer.found', {initiator: true});
-      } else {
-        console.log('[pair] No other peer found');
-        // I am waiting for you.
-        peersWaiting[pairCode] = client;
-      }
+          client.peer = waiting;
+          waiting.peer = client;
+          connections[pairCode] = [client, waiting];
+          // peersWaiting[pairCode] = null;
+          waiting.sendMessage('peer.found', {initiator: false});
+          client.sendMessage('peer.found', {initiator: true});
+        } else {
+          console.log('[pair] No other peer found');
+          // I am waiting for you.
+          // peersWaiting[pairCode] = client;
+          if (peersWaiting[pairCode]) {
+            peersWaiting[pairCode].push(client);
+          } else {
+            peersWaiting[pairCode] = [client];
+          }
+        }
+      });
     });
 
     client.on('message.rtc.signal', data => {
@@ -143,10 +148,17 @@ function SocketPeerServer (opts) {
     });
 
     client.on('close', () => {
-      if (client.pairCode in peersWaiting &&
-          peersWaiting[client.pairCode] === client) {
-        peersWaiting[client.pairCode] = null;
+      if (client.pairCode in peersWaiting) {
+        const clientIdx = peersWaiting[client.pairCode].indexOf(client);
+        if (clientIdx > -1) {
+          peersWaiting[client.pairCode].splice(peersWaiting[client.pairCode].indexOf(client));
+        }
       }
+
+      // if (client.pairCode in peersWaiting &&
+      //     peersWaiting[client.pairCode] === client) {
+      //   peersWaiting[client.pairCode] = null;
+      // }
 
       if (client.peer) {
         peersWaiting[client.pairCode] = client.peer;
