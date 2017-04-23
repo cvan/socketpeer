@@ -29,6 +29,7 @@ function SocketPeer (opts) {
     rtc: {success: 0, error: 0, attempt: 0}
   };
   self.peer = null;
+  self.peerConnected = false;
   self.rtcConnected = false;
   self.socketConnected = false;
 
@@ -48,6 +49,7 @@ function SocketPeer (opts) {
   self._debug('New peer');
 
   self.on('peer.found', function (data) {
+    self.peerConnected = true;
     self.socketConnected = true;
     clearTimeout(self._socketConnectTimeout);
     clearTimeout(self._socketReconnectDelayTimeout);
@@ -65,6 +67,10 @@ function SocketPeer (opts) {
       self._send('rtc.connect');
       self._rtcInit();
     }
+  });
+  self.on('peer.lost', function () {
+    self.peerConnected = false;
+    self.emit('disconnect');
   });
   self.on('rtc.signal', self._rtcSignal);
   self.on('rtc.connect', function () {
@@ -136,8 +142,10 @@ SocketPeer.prototype.connect = function () {
     }
   };
   self.socket.onclose = function () {
+    self.peerConnected = false;
     self.socketConnected = false;
     self._debug('close');
+    self.emit('disconnect');
 
     if (self.reconnect) {
       var delay = self._calcReconnectTimeout(self._connections.socket.attempt);
@@ -226,6 +234,9 @@ SocketPeer.prototype._rtcInit = function () {
           self._rtcInit();
         }, delay);
       }
+    } else {
+      self.peerConnected = false;
+      self.emit('disconnect');
     }
 
     self.emit('downgrade');
