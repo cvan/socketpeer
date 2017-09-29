@@ -62,11 +62,21 @@ function SocketPeerServer (opts) {
   var peersWaiting = Object.create(null);
   var connections = Object.create(null);
 
-  function closeConnection (pairCode) {
+  function closeConnection (pairCode, filter) {
+    if (!filter) {
+      // Create a no-op function.
+      filter = x => x;
+    }
+    let matched = false;
     connections[pairCode].forEach(conn => {
-      conn.peer = null;
+      matched = filter(conn);
+      if (matched) {
+        conn.peer = null;
+      }
     });
-    connections[pairCode] = null;
+    if (matched) {
+      connections[pairCode] = null;
+    }
   }
 
   function sendMessage (type, data) {
@@ -100,8 +110,13 @@ function SocketPeerServer (opts) {
       console.log('[pair] Received pairCode:', pairCode);
 
       if (connections[pairCode]) {
-        client.sendMessage('busy');
-        return;
+        client.sendMessage('warning', {
+          message: '`pairCode` "' + pairCode + '" is already in use',
+          pairCode: pairCode
+        });
+        closeConnection(pairCode, function (clientToCheck) {
+          return clientToCheck !== client;
+        });
       }
 
       client.pairCode = pairCode;
@@ -143,14 +158,14 @@ function SocketPeerServer (opts) {
     });
 
     client.on('close', () => {
-      if (client.pairCode in peersWaiting &&
-          peersWaiting[client.pairCode] === client) {
-        peersWaiting[client.pairCode] = null;
+      const pairCode = client.pairCode;
+      if (pairCode in peersWaiting && peersWaiting[pairCode] === client) {
+        peersWaiting[pairCode] = null;
       }
 
       if (client.peer) {
-        peersWaiting[client.pairCode] = client.peer;
-        closeConnection(client.pairCode);
+        peersWaiting[pairCode] = client.peer;
+        closeConnection(pairCode);
       }
     });
   });

@@ -52,10 +52,6 @@ peer.on('data', function (data) {
   console.log('data received:', data);
 });
 
-peer.on('busy', function () {
-  console.error('`pairCode` "%s" is already in use', peer.pairCode);
-});
-
 peer.on('rtc.signal', function () {
   console.log('WebRTC signalling');
 });
@@ -76,6 +72,10 @@ peer.on('upgrade_attempt', function () {
 
 peer.on('downgrade', function () {
   console.log('downgraded WebRTC peer connection ⇒ to WebSocket connection');
+});
+
+peer.on('warning', function (data) {
+  console.error('warning:', data.message);
 });
 
 peer.on('error', function (err) {
